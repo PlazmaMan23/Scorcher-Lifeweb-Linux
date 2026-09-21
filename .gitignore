@@ -1,0 +1,3 @@
+# local caches
+*.part
+__pycache__/

@@ -55,7 +55,7 @@ When it's done you'll have a **BYOND** entry in Lutris.
 ## First launch
 
 1. Start **BYOND** from Lutris and log in to your BYOND account in the pager.
-2. Join the server, e.g. Scorcher at `byond://eu2.lfwb.at:1414`.
+2. Join the server you want to play, from the pager's game list or a `byond://` link.
 3. **Wait on the "Your Game Is Starting" window**, even if it shows a white page
    saying **"Forbidden"**. That page is harmless. Behind it, the game is downloading
    its resource pack (hundreds of MB). Closing the window at this point is what
@@ -91,8 +91,8 @@ Existing fonts with the same file name are moved into
 | Symptom | Status / workaround |
 |---|---|
 | "Forbidden" page when joining | Not an error. Wait for the resource download (see *First launch*). |
-| Right-hand chat panel goes blank after alt-tab | WebView2-under-Wine redraw issue. No fix yet. |
-| A small **box `□`** next to the currency counter (top-left) | The rune `ᛞ` isn't in Retron2000. Windows falls back to another font, Wine doesn't. Not fixed yet. |
+| Right-hand chat panel is blank after alt-tabbing back | Click on the chat window and it redraws. A WebView2-under-Wine redraw quirk; harmless. |
+| No icon for the **dangs** symbol on Scorcher: a small box `□` next to the counter | The symbol isn't in the font the counter uses, and Wine doesn't substitute another font for it like Windows does. Cosmetic, not fixed yet. |
 | Other HUD text slightly too wide / wrapping | Other unhinted game fonts may have the same issue as Retron2000 (see below). Not patched yet. |
 
 ## Things that do **not** help (don't bother)

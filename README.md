@@ -101,7 +101,7 @@ Existing fonts with the same file name are moved into
 |---|---|
 | "Forbidden" page when joining | Not an error. Wait for the resource download (see *First launch*). |
 | Right-hand chat panel is blank after alt-tabbing back | Click on the chat window and it redraws. A WebView2-under-Wine redraw quirk; harmless. |
-| No icon for the **dangs** symbol on Scorcher: a small box `□` next to the counter | The symbol isn't in the font the counter uses, and Wine doesn't substitute another font for it like Windows does. Cosmetic, not fixed yet. |
+| No icon for the **dangs** symbol on Scorcher: a small box `□` next to the counter | Should be fixed by the bundled fonts (see *How the font fixes work*). Awaiting in-game confirmation — please report if you still see a box. |
 | Other HUD text slightly too wide / wrapping | Other unhinted game fonts may have the same issue as Retron2000 (see below). Not patched yet. |
 
 ## Things that do **not** help (don't bother)
@@ -113,7 +113,7 @@ Existing fonts with the same file name are moved into
 
 ---
 
-## How the stat-box fix works
+## How the font fixes work
 
 Scorcher draws its HUD text (maptext) with **Retron2000**, a monospaced pixel
 font. The font ships without TrueType hinting tables (`fpgm`/`prep`). With no
@@ -129,6 +129,16 @@ shapes are unchanged. The bundled `fonts/12420.ttf` was produced with:
 
 ```bash
 ./scripts/patch-font-hinting.py original/12420.ttf fonts/12420.ttf
+```
+
+**The dangs symbol.** The counter draws the rune ᛞ (U+16DE), which Retron2000 doesn't
+contain. Windows fills a missing character in from another font; Wine draws the font's
+own "missing character" box instead. The game ships a font that has the rune
+(`Pixel.ttf`), so `scripts/copy-glyph.py` copies that one glyph into Retron2000, scaled
+to the same cap height and given the same spacing as its digits:
+
+```bash
+./scripts/copy-glyph.py fonts/Pixel.ttf 12420-hinted.ttf U+16DE fonts/12420.ttf
 ```
 
 The same approach may help other game fonts that lack hinting (Project Sans
@@ -188,4 +198,5 @@ fonts/                        bundled game fonts (see fonts/NOTICE.md)
 scripts/install-fonts.sh      copy fonts into a prefix (with backups)
 scripts/check-setup.sh        read-only health check of a prefix
 scripts/patch-font-hinting.py add no-op hinting tables to a TrueType font
+scripts/copy-glyph.py         copy one character's glyph between fonts
 ```

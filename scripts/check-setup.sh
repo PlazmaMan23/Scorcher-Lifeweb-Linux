@@ -42,12 +42,28 @@ if (( missing == 0 && different == 0 )); then ok "All bundled fonts installed an
 else warn "Fonts: $missing missing, $different different -> run scripts/install-fonts.sh \"$prefix\""; fi
 
 retron="$(find "$fonts" -maxdepth 1 -iname 12420.ttf -print -quit 2>/dev/null)"
-if [[ -n "$retron" ]] && python3 -c "import sys; from fontTools.ttLib import TTFont; f=TTFont(sys.argv[1]); sys.exit(0 if 'fpgm' in f and 'prep' in f else 1)" "$retron" 2>/dev/null; then
-    ok "Retron2000 (12420.ttf) has the hinting patch"
-elif [[ -n "$retron" ]] && ! python3 -c "import fontTools" 2>/dev/null; then
-    cmp -s "$retron" "$repo/fonts/12420.ttf" && ok "Retron2000 matches the patched copy" || warn "Can't verify Retron2000 patch (fontTools not installed)"
+font_has() {  # font_has <file> <expression over TTFont f>
+    python3 -c "import sys
+from fontTools.ttLib import TTFont
+f = TTFont(sys.argv[1])
+sys.exit(0 if ($2) else 1)" "$1" 2>/dev/null
+}
+if [[ -z "$retron" ]]; then
+    bad "Retron2000 (12420.ttf) missing: stat numbers will disappear"
+elif ! python3 -c "import fontTools" 2>/dev/null; then
+    cmp -s "$retron" "$repo/fonts/12420.ttf" && ok "Retron2000 matches the bundled copy" \
+        || warn "Can't verify Retron2000 (fontTools not installed)"
 else
-    bad "Retron2000 missing or unpatched: stat numbers may disappear"
+    if font_has "$retron" "'fpgm' in f and 'prep' in f"; then
+        ok "Retron2000 has the hinting patch (stat box)"
+    else
+        bad "Retron2000 is unpatched: stat numbers may disappear"
+    fi
+    if font_has "$retron" "0x16DE in f.getBestCmap()"; then
+        ok "Retron2000 has the dangs rune"
+    else
+        warn "Retron2000 lacks the dangs rune -> the counter shows a box; reinstall the fonts"
+    fi
 fi
 
 if grep -qE '^"\*?(wininet|urlmon|mshtml)"="native' "$prefix/user.reg" 2>/dev/null; then

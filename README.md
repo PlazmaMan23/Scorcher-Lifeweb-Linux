@@ -1,12 +1,13 @@
-# BYOND on Linux (Lutris) — with fixes for Scorcher's UI
+# BYOND on Linux (Lutris) — with fixes for Scorcher's and LifeWeb's UI
 
-A Lutris-based install of **BYOND 516.1683** that plays Space Station 13–style
-games (tested on **Scorcher**) under Wine. It includes the workarounds found while
-getting the HUD to render correctly on Linux.
+A Lutris-based install of **BYOND** that plays Space Station 13–style games
+(tested on **Scorcher** and **LifeWeb**) under Wine. It includes the workarounds
+found while getting the HUD to render correctly on Linux.
 
 What you get:
 
-- BYOND 516.1683 in its own Wine prefix, installed through Lutris
+- BYOND in its own Wine prefix, installed through Lutris: 516.1683 for Scorcher,
+  516.1673 for LifeWeb
 - A pinned Wine build (**wine-staging 11.17, WoW64**) so everyone runs the same Wine
 - WebView2 (BYOND's pager and chat UI), Visual C++ 2022 runtime, DirectX bits, core fonts
 - Scorcher's HUD fonts, including a **patched Retron2000** that fixes the missing
@@ -19,7 +20,8 @@ What you get:
 - A 64-bit Linux distro with a working Vulkan driver (DXVK is used)
 - **Lutris** (distro package or Flatpak `net.lutris.Lutris`)
 - `curl`, `tar`, `sha256sum` (present on most systems)
-- About 3 GB of free disk space (plus ~750 MB for a game's resources on first join)
+- About 3 GB of free disk space per game (plus its resources on first join,
+  hundreds of MB)
 - Optional: `python3` with fontTools, only for `scripts/check-setup.sh` and
   `scripts/patch-font-hinting.py`
 
@@ -31,8 +33,15 @@ the install finishes, because Lutris copies the fonts from it.
 ```bash
 git clone https://github.com/PlazmaMan23/Scorcher-Lifeweb-Linux.git ~/Scorcher-Lifeweb-Linux
 cd ~/Scorcher-Lifeweb-Linux
-./install.sh
+./install.sh            # Scorcher  - BYOND 516.1683
+./install.sh lifeweb    # LifeWeb   - BYOND 516.1673
 ```
+
+The two games need different BYOND builds, so each one installs into **its own Wine
+prefix** and gets its own Lutris entry. You can install both; give each a separate
+install folder (for example `~/Games/byond` and `~/Games/byond-lifeweb`) and never
+point one at the other's folder. Everything else, including the font fixes, is the same
+for both.
 
 `install.sh`:
 
@@ -173,7 +182,8 @@ what to check in-game and has a report template to send back.
 ```
 install.sh                    entry point
 TESTING.md                    checklist + report template for testers
-lutris/byond.yml.in           Lutris installer template (filled in by install.sh)
+lutris/byond.yml.in           Lutris installer template, Scorcher (filled in by install.sh)
+lutris/byond-lifeweb.yml.in   Lutris installer template, LifeWeb
 fonts/                        bundled game fonts (see fonts/NOTICE.md)
 scripts/install-fonts.sh      copy fonts into a prefix (with backups)
 scripts/check-setup.sh        read-only health check of a prefix

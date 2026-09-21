@@ -1,0 +1,100 @@
+# Lutris installer for BYOND 516.1673 (the build LifeWeb needs) with the Linux
+# fixes from this repo. Same steps as byond.yml.in, only the BYOND build differs,
+# so each game gets its own prefix and its own pinned BYOND version.
+# Don't run this file directly: install.sh fills in @REPO@ and @RUNNER@.
+name: BYOND (516.1673)
+game_slug: byond
+version: v516.1673 + Linux fixes (LifeWeb)
+slug: byond-v5161673-linux-fixes-lifeweb
+runner: wine
+year: 2003
+description: Byond 516 build with the Microsoft Edge Webview2 replacement for IE11, plus Linux HUD font fixes.
+notes: |
+  Based on byond-v5161680-egl. Servers made for versions before 515 don't work well if at all.
+  Common issues and guides: https://github.com/kinggoldcatter/Wine-Byond-help
+
+script:
+  files:
+    # BYOND 516.1673, checksum-verified
+    - installer:
+        url: https://www.byond.com/download/build/516/516.1673_byond.exe
+        filename: 516.1673_byond.exe
+        checksum: sha256:355cbadba541342d1d0339d81e687347c2696d21b50a702f2e5f794c6c0d43ad
+    - webview2:
+        filename: MicrosoftEdgeWebView2RuntimeInstallerX64.exe
+        url: https://go.microsoft.com/fwlink/?linkid=2124701
+
+  game:
+    exe: drive_c/Program Files (x86)/BYOND/bin/byond.exe
+    prefix: $GAMEDIR
+
+  installer:
+    - task:
+        description: Creating prefix (you do NOT need mono)
+        name: create_prefix
+        prefix: $GAMEDIR
+    - task:
+        app: vcrun2022
+        description: Installing vcrun2022 with Winetricks
+        name: winetricks
+        prefix: $GAMEDIR
+    - task:
+        app: dxtrans
+        description: Installing dxtrans with Winetricks
+        name: winetricks
+        prefix: $GAMEDIR
+    - task:
+        app: corefonts
+        description: Installing fonts with Winetricks
+        name: winetricks
+        prefix: $GAMEDIR
+    - task:
+        description: setting msedgewebview2.exe to win7 (Wine Work-Around)
+        key: version
+        name: set_regedit
+        path: HKEY_CURRENT_USER\Software\Wine\AppDefaults\msedgewebview2.exe
+        prefix: $GAMEDIR
+        type: REG_SZ
+        value: win7
+    - task:
+        args: /install
+        description: Installing Webview2 (If nothing appears, this failed)
+        exclude_processes: MicrosoftEdgeUpdate.exe
+        executable: webview2
+        name: wineexec
+        prefix: $GAMEDIR
+    - task:
+        description: Terminating MicrosoftEdgeUpdate.exe...
+        name: winekill
+        prefix: $GAMEDIR
+    - task:
+        args: /S
+        description: Installing BYOND
+        executable: installer
+        name: wineexec
+        prefix: $GAMEDIR
+        return_code: 50944
+    - task:
+        args: /silent
+        description: Installing BYOND packaged DirectX
+        executable: $GAMEDIR/drive_c/Program Files (x86)/BYOND/directx/DXSETUP.exe
+        name: wineexec
+        prefix: $GAMEDIR
+    # HUD fonts, incl. Retron2000 patched so the stat box fits
+    - execute:
+        description: Installing HUD fonts (Retron2000 stat-box fix)
+        command: '"@REPO@/scripts/install-fonts.sh" "$GAMEDIR"'
+
+  # pinned Wine build (installed by install.sh)
+  wine:
+    version: @RUNNER@
+    Desktop: false
+    dxvk: true
+    dxvk_nvapi: false
+    esync: false
+    fsync: false
+
+  system:
+    disable_runtime: true
+    env:
+      WINE_SIMULATE_WRITECOPY: '1'

@@ -3,7 +3,19 @@
 #   1. downloads the pinned Wine build into Lutris' runner folder (checksum-verified)
 #   2. fills in the Lutris installer template with this repo's path
 #   3. hands the installer to Lutris (you click through the Lutris window)
+#
+# Usage: ./install.sh [scorcher|lifeweb]
+#   scorcher (default)  BYOND 516.1683
+#   lifeweb             BYOND 516.1673
+# Each one installs into its own Wine prefix, so both can be installed side by side.
 set -euo pipefail
+
+case "${1:-scorcher}" in
+    scorcher) template="byond.yml.in";         game_label="Scorcher (BYOND 516.1683)" ;;
+    lifeweb)  template="byond-lifeweb.yml.in"; game_label="LifeWeb (BYOND 516.1673)" ;;
+    -h|--help) echo "usage: $0 [scorcher|lifeweb]"; exit 0 ;;
+    *) echo "unknown game '${1}' (expected: scorcher, lifeweb)" >&2; exit 1 ;;
+esac
 
 ARCHIVE="wine-11.17-staging-amd64-wow64"
 RUNNER_URL="https://github.com/Kron4ek/Wine-Builds/releases/download/11.17/${ARCHIVE}.tar.xz"
@@ -60,11 +72,13 @@ fi
 
 # --- 2. Render the Lutris installer --------------------------------------------
 mkdir -p "$cache"
-installer="$cache/byond-linux-fixes.yml"
-sed -e "s|@REPO@|$repo|g" -e "s|@RUNNER@|$RUNNER|g" "$repo/lutris/byond.yml.in" > "$installer"
+installer="$cache/${template%.yml.in}-linux-fixes.yml"
+sed -e "s|@REPO@|$repo|g" -e "s|@RUNNER@|$RUNNER|g" "$repo/lutris/$template" > "$installer"
 echo "Lutris installer written to: $installer"
 
 # --- 3. Run it ----------------------------------------------------------------
-echo "Opening Lutris. Pick an install folder (e.g. ~/Games/byond) and follow the prompts."
+echo "Installing: $game_label"
+echo "Opening Lutris. Pick an install folder of its own (e.g. ~/Games/byond or ~/Games/byond-lifeweb)"
+echo "and follow the prompts. Don't reuse another game's folder."
 echo "Tip: close games/heavy apps during install; unpacking WebView2 needs RAM and ~2 GB disk."
 "${lutris_cmd[@]}" -i "$installer"

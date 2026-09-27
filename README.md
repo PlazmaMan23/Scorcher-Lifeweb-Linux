@@ -10,8 +10,10 @@ What you get:
   516.1673 for LifeWeb
 - A pinned Wine build (**wine-staging 11.17, WoW64**) so everyone runs the same Wine
 - WebView2 (BYOND's pager and chat UI), Visual C++ 2022 runtime, DirectX bits, core fonts
-- Scorcher's HUD fonts, including a **patched Retron2000** that fixes the missing
-  stat numbers (`ST DX HT PR IN AT` box)
+- A **patched Retron2000** font that fixes the missing stat numbers
+  (`ST DX HT PR IN AT` box). The game's other fonts are deliberately **not**
+  installed into the prefix: it ships them itself, and installing them breaks the
+  skills-tab dots (see *How the font fixes work*)
 
 ---
 
@@ -90,8 +92,10 @@ You can apply just the font fix to an existing prefix. Close BYOND first:
 ./scripts/install-fonts.sh ~/Games/your-byond-prefix
 ```
 
-Existing fonts with the same file name are moved into
-`<prefix>/fonts-backup-<timestamp>/` before being replaced.
+This installs the patched Retron2000 and **removes** the game's other fonts if an
+earlier version of this repo installed them. Anything it replaces or removes is moved
+to `<prefix>/fonts-backup-<timestamp>/`, so nothing is lost. Use `--all` to install
+every bundled font (the old behaviour, not recommended).
 
 ---
 
@@ -103,6 +107,7 @@ Existing fonts with the same file name are moved into
 | Right-hand chat panel is blank after alt-tabbing back | Click on the chat window and it redraws. A WebView2-under-Wine redraw quirk; harmless. |
 | No icon for the **dangs** symbol on Scorcher: a small box `□` next to the counter | Should be fixed by the bundled fonts (see *How the font fixes work*). Awaiting in-game confirmation — please report if you still see a box. |
 | Other HUD text slightly too wide / wrapping | Other unhinted game fonts may have the same issue as Retron2000 (see below). Not patched yet. |
+| Skills tab shows **boxes instead of dots** (`●○○○○`) | Caused by the game's own fonts being installed into the prefix; run `./scripts/install-fonts.sh <prefix>`, which removes them. If it persists, check for copies installed system-wide (`~/.local/share/fonts`, `/usr/local/share/fonts`) and remove those too. |
 
 ## Things that do **not** help (don't bother)
 
@@ -140,6 +145,15 @@ to the same cap height and given the same spacing as its digits:
 ```bash
 ./scripts/copy-glyph.py fonts/Pixel.ttf 12420-hinted.ttf U+16DE fonts/12420.ttf
 ```
+
+**Why only Retron2000 is installed.** The game ships all its fonts in its own
+resource pack, so putting them in the prefix's Windows font folder adds nothing. It
+does cause harm, though: Project Sans (the skills panel font), Neometric Alt and
+ErisPro contain no `●` or `○`, and draw a labelled box for characters they lack. When
+the embedded browser resolves such a font by name, the skills-tab dots become boxes
+instead of falling back to a font that has them. Wine 11.18 started exposing installed
+fonts to WebView2 where 11.17 didn't, so an install that looked fine broke on update.
+Only fonts this repo *patches* are installed now.
 
 The same approach may help other game fonts that lack hinting (Project Sans
 `SCOVRB.ttf`, IntellectCYR `19187.ttf`, TL header `TLHeader.otf`,

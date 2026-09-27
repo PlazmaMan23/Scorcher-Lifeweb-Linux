@@ -37,7 +37,7 @@ Then take screenshots of:
 | # | What | When | What it should look like |
 |---|---|---|---|
 | 1 | Bottom-left **stat box** | once in-game | Two lines: numbers on top, `ST DX HT PR IN AT` below |
-| 2 | **Skills** tab in the chat panel | right after joining | Dots `●○○○○`, not boxes |
+| 2 | **Skills** tab in the chat panel | right after joining | Dots `●○○○○`, not boxes. If boxes: note your Wine version and whether `check-setup.sh` reports redundant fonts |
 | 3 | **Skills** tab in the chat panel | after ~30 minutes of play | Same as above |
 | 4 | **Skills** window during character creation | when you see it | Dots, not boxes |
 | 5 | Top-left **currency counter** | once in-game | A rune symbol before the number (a box `□` is a known issue) |

@@ -31,15 +31,22 @@ grep -q 'msedgewebview2.exe' "$prefix/user.reg" 2>/dev/null && ok "WebView2 Wind
     || warn "No AppDefaults entry for msedgewebview2.exe (win7)"
 
 fonts="$prefix/drive_c/windows/Fonts"
-missing=0; different=0
+# Only the patched fonts belong in the prefix; the game ships the rest itself, and
+# installing those can turn the skills-tab dots into boxes (see install-fonts.sh).
+patched=(12420.ttf)
+extra=0
 for font in "$repo"/fonts/*.ttf "$repo"/fonts/*.otf; do
     name="$(basename "$font")"
-    existing="$(find "$fonts" -maxdepth 1 -iname "$name" -print -quit 2>/dev/null)"
-    if [[ -z "$existing" ]]; then missing=$((missing + 1))
-    elif ! cmp -s "$font" "$existing"; then different=$((different + 1)); fi
+    keep=0
+    for p in "${patched[@]}"; do [[ "$name" == "$p" ]] && keep=1; done
+    (( keep )) && continue
+    [[ -n "$(find "$fonts" -maxdepth 1 -iname "$name" -print -quit 2>/dev/null)" ]] && extra=$((extra + 1))
 done
-if (( missing == 0 && different == 0 )); then ok "All bundled fonts installed and up to date"
-else warn "Fonts: $missing missing, $different different -> run scripts/install-fonts.sh \"$prefix\""; fi
+if (( extra )); then
+    warn "$extra font(s) the game provides itself are installed here -> run scripts/install-fonts.sh \"$prefix\" (they can turn the skills dots into boxes)"
+else
+    ok "No redundant game fonts installed"
+fi
 
 retron="$(find "$fonts" -maxdepth 1 -iname 12420.ttf -print -quit 2>/dev/null)"
 font_has() {  # font_has <file> <expression over TTFont f>

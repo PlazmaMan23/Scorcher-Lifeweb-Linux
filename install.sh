@@ -43,6 +43,19 @@ fi
 for tool in curl tar sha256sum; do
     command -v "$tool" >/dev/null 2>&1 || die "'$tool' is required but not installed."
 done
+
+# The Lutris installer runs winetricks (vcrun2022, dxtrans, corefonts). The copy
+# Lutris bundles is often outdated and then fails on Microsoft's current
+# vc_redist download ("Downloading ... vc_redist.x86.exe failed"), so the script
+# tells Lutris to use the system one - which has to exist and be recent.
+if ! command -v winetricks >/dev/null 2>&1; then
+    die "winetricks is not installed. Install your distro's winetricks package and re-run."
+fi
+winetricks_version="$(winetricks --version 2>/dev/null | awk '{print $1}')"
+if [[ "${winetricks_version:-0}" =~ ^[0-9]{8}$ ]] && (( winetricks_version < 20251001 )); then
+    echo "warning: winetricks $winetricks_version is old; if the install fails while downloading"
+    echo "         vc_redist, update it (e.g. 'sudo winetricks --self-update') and try again."
+fi
 [[ "$repo" == *" "* ]] && die "Please move this folder to a path without spaces (Lutris quoting): $repo"
 
 # --- 1. Pinned Wine runner ----------------------------------------------------

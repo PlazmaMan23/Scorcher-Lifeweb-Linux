@@ -22,6 +22,8 @@ What you get:
 - A 64-bit Linux distro with a working Vulkan driver (DXVK is used)
 - **Lutris** (distro package or Flatpak `net.lutris.Lutris`)
 - `curl`, `tar`, `sha256sum` (present on most systems)
+- **winetricks**, reasonably recent (2025-10 or newer). The installer uses the system
+  winetricks because the copy Lutris bundles is often too old (see *Troubleshooting*)
 - About 3 GB of free disk space per game (plus its resources on first join,
   hundreds of MB)
 - Optional: `python3` with fontTools, only for `scripts/check-setup.sh` and
@@ -183,6 +185,24 @@ failed. The usual culprit is WebView2. Check
 1. Delete the half-finished install folder (Lutris may fail to trash it itself).
 2. Close other heavy programs and run `./install.sh` again. Lutris downloads a fresh
    copy of the WebView2 installer.
+
+**"Downloading ... vc_redist.x86.exe failed" during install.** winetricks verifies
+downloads against a checksum, Microsoft periodically republishes that file, and an
+outdated winetricks then rejects it and falls back to the Wayback Machine, which fails
+too. Update winetricks and run `./install.sh` again:
+
+```bash
+winetricks --version          # date-like version, e.g. 20260125
+sudo winetricks --self-update # or update your distro's winetricks package
+```
+
+If Lutris still uses its own bundled copy, replace it with the current one:
+
+```bash
+curl -L https://raw.githubusercontent.com/Winetricks/winetricks/master/src/winetricks \
+  -o ~/.local/share/lutris/runtime/winetricks/winetricks
+chmod +x ~/.local/share/lutris/runtime/winetricks/winetricks
+```
 
 **Lutris: "Failed to retrieve wine (...) information".** Lutris can't find the
 Wine build. Re-run `./install.sh`, which installs it into Lutris' runner folder

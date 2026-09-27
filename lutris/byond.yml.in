@@ -90,6 +90,9 @@ script:
   # author's working Lutris entry
   wine:
     version: @RUNNER@
+    # Use the system winetricks: the copy Lutris bundles is often too old and
+    # rejects Microsoft's current vc_redist download over a checksum mismatch.
+    system_winetricks: true
     Desktop: false
     dxvk: true
     dxvk_nvapi: false

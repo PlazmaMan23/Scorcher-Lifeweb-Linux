@@ -40,18 +40,21 @@ script:
         name: winetricks
         prefix: $GAMEDIR
         system_winetricks: true
+        disable_runtime: true
     - task:
         app: dxtrans
         description: Installing dxtrans with Winetricks
         name: winetricks
         prefix: $GAMEDIR
         system_winetricks: true
+        disable_runtime: true
     - task:
         app: corefonts
         description: Installing fonts with Winetricks
         name: winetricks
         prefix: $GAMEDIR
         system_winetricks: true
+        disable_runtime: true
     - task:
         description: setting msedgewebview2.exe to win7 (Wine Work-Around)
         key: version
@@ -93,8 +96,7 @@ script:
   # author's working Lutris entry
   wine:
     version: @RUNNER@
-    # Use the system winetricks: the copy Lutris bundles is often too old and
-    # rejects Microsoft's current vc_redist download over a checksum mismatch.
+    # Prefer the system winetricks over the copy Lutris bundles.
     system_winetricks: true
     Desktop: false
     dxvk: true

@@ -38,16 +38,19 @@ script:
         description: Installing vcrun2022 with Winetricks
         name: winetricks
         prefix: $GAMEDIR
+        system_winetricks: true
     - task:
         app: dxtrans
         description: Installing dxtrans with Winetricks
         name: winetricks
         prefix: $GAMEDIR
+        system_winetricks: true
     - task:
         app: corefonts
         description: Installing fonts with Winetricks
         name: winetricks
         prefix: $GAMEDIR
+        system_winetricks: true
     - task:
         description: setting msedgewebview2.exe to win7 (Wine Work-Around)
         key: version

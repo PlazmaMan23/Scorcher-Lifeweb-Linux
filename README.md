@@ -196,7 +196,8 @@ winetricks --version          # date-like version, e.g. 20260125
 sudo winetricks --self-update # or update your distro's winetricks package
 ```
 
-If Lutris still uses its own bundled copy, replace it with the current one:
+The installer asks Lutris to use the system winetricks for each step. If Lutris still
+uses its own bundled copy, replace it with the current one:
 
 ```bash
 curl -L https://raw.githubusercontent.com/Winetricks/winetricks/master/src/winetricks \

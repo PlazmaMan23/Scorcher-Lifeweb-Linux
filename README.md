@@ -109,7 +109,52 @@ every bundled font (the old behaviour, not recommended).
 | Right-hand chat panel is blank after alt-tabbing back | Click on the chat window and it redraws. A WebView2-under-Wine redraw quirk; harmless. |
 | No icon for the **dangs** symbol on Scorcher: a small box `□` next to the counter | Should be fixed by the bundled fonts (see *How the font fixes work*). Awaiting in-game confirmation — please report if you still see a box. |
 | Other HUD text slightly too wide / wrapping | Other unhinted game fonts may have the same issue as Retron2000 (see below). Not patched yet. |
+| Can only type in one keyboard layout in the chat, and in other windows the game opens | The usual switch (Alt+Shift and the like) changes only the XKB group, which Wine doesn't pass on to Windows programs. Switch with `./scripts/set-layout.sh <layout>` instead, or type elsewhere and paste with Ctrl+V. See *Keyboard layouts*. |
 | Skills tab shows **boxes instead of dots** (`●○○○○`) | Caused by the game's own fonts being installed into the prefix; run `./scripts/install-fonts.sh <prefix>`, which removes them. If it persists, check for copies installed system-wide (`~/.local/share/fonts`, `/usr/local/share/fonts`) and remove those too. |
+
+## Keyboard layouts
+
+If you type in more than one layout, you may find that the chat panel - and any
+window the game opens - only accepts one of them, no matter what you switch to.
+
+The windows the game opens are WebView2, i.e. Chromium, and Chromium works out
+characters from the active keyboard layout itself, rebuilding its key table when
+the system announces that the layout changed. Your usual shortcut only changes the
+XKB **group**. Wine follows that correctly for its own windows, but reports a single,
+never-changing keyboard layout to the programs running under it and announces no
+change, so Chromium goes on using the table it built first. Measured with
+`wine-11.19`:
+
+```
+[startup] active HKL=0x04090409 (name 00000409), 1 layout(s) known: 0x04090409
+```
+
+one layout, and no `WM_INPUTLANGCHANGE` at any point while switching groups.
+
+Replacing the **keymap** does reach those windows, immediately and without
+reopening anything. So switch layouts that way instead:
+
+```bash
+./scripts/set-layout.sh            # show the current list and how it will be changed
+./scripts/set-layout.sh us         # put us first, keeping your other layouts
+./scripts/set-layout.sh us ru      # or set the list outright
+```
+
+It works out what your session supports: `swaymsg` on sway, `hyprctl` on Hyprland,
+`riverctl` on river, `setxkbmap` on X11, `gsettings` on GNOME, and `kxkbrc` plus a
+KWin reload on KDE Plasma. Bind it to a key in your WM or desktop's shortcut
+settings and use it in place of the group switch while playing.
+
+Compositors with no command to change the keymap of a running session (labwc,
+Wayfire, plain weston) can only take it from the environment at startup:
+
+```
+XKB_DEFAULT_LAYOUT=us,ru
+XKB_DEFAULT_OPTIONS=grp:alt_shift_toggle
+```
+
+Put the layout you need in the game first. Failing all that, type in another
+program and paste with Ctrl+V, which always works.
 
 ## Things that do **not** help (don't bother)
 
@@ -232,6 +277,7 @@ lutris/byond-lifeweb.yml.in   Lutris installer template, LifeWeb
 fonts/                        bundled game fonts (see fonts/NOTICE.md)
 scripts/install-fonts.sh      copy fonts into a prefix (with backups)
 scripts/check-setup.sh        read-only health check of a prefix
+scripts/set-layout.sh         switch keyboard layout so the game's windows follow
 scripts/patch-font-hinting.py add no-op hinting tables to a TrueType font
 scripts/copy-glyph.py         copy one character's glyph between fonts
 ```
